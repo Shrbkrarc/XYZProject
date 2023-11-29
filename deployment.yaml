@@ -1,0 +1,36 @@
+---
+- name: Deploy Docker Image in Kubernetes
+  hosts: localhost
+  gather_facts: false
+
+  vars:
+    k8s_namespace: default
+    k8s_deployment_name: xyztech
+    k8s_app_image: "shrutir20/xyzprj:latest"
+
+  tasks:
+    - name: Create or update Kubernetes Deployment
+      k8s:
+        state: "present"
+        kubeconfig: "kubeconfig.yaml"
+        definition:
+          kind: Deployment
+          apiVersion: apps/v1
+          metadata:
+            name: "{{ k8s_deployment_name }}"
+            namespace: "{{ k8s_namespace }}"
+          spec:
+            replicas: 3
+            selector:
+              matchLabels:
+                app: "{{ k8s_deployment_name }}"
+            template:
+              metadata:
+                labels:
+                  app: "{{ k8s_deployment_name }}"
+              spec:
+                containers:
+                  - name: "{{ k8s_deployment_name }}-container"
+                    image: "{{ k8s_app_image }}"
+                    ports:
+                      - containerPort: 80
